@@ -1,6 +1,14 @@
 spring:
   application:
     name: optical-ai-lab
+  datasource:
+    url: jdbc:h2:file:./data/opticai
+    username: sa
+    password: ""
+  jpa:
+    hibernate:
+      ddl-auto: update
+    open-in-view: false
   ai:
     anthropic:
       api-key: ${ANTHROPIC_API_KEY:not-set}
