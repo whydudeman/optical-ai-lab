@@ -6,7 +6,7 @@ spring:
       api-key: ${ANTHROPIC_API_KEY:not-set}
       chat:
         options:
-          model: claude-opus-4-8
+          model: claude-sonnet-4-6
           max-tokens: 8000
     openai:
       api-key: ${OPENAI_API_KEY:not-set}
