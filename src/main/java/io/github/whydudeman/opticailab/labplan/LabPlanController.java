@@ -17,7 +17,7 @@ public class LabPlanController {
     }
 
     @PostMapping
-    public LabPlan generate(@Valid @RequestBody LabPlanRequest request) {
+    public LabPlanResponse generate(@Valid @RequestBody LabPlanRequest request) {
         return labPlanService.generate(request);
     }
 }

@@ -81,7 +81,13 @@ async function generatePlan() {
         <li v-for="step in plan.steps" :key="step.number">
           <strong>{{ step.title }}</strong>
           <p>{{ step.description }}</p>
-          <a :href="`https://www.youtube.com/results?search_query=${encodeURIComponent(step.videoSearchQuery)}`"
+          <ul v-if="step.videos?.length" class="videos">
+            <li v-for="video in step.videos" :key="video.videoId">
+              <a :href="video.url" target="_blank">▶ {{ video.title }}</a>
+            </li>
+          </ul>
+          <a v-else
+             :href="`https://www.youtube.com/results?search_query=${encodeURIComponent(step.videoSearchQuery)}`"
              target="_blank">Найти видео</a>
         </li>
       </ol>
@@ -163,5 +169,13 @@ button:disabled {
 }
 .plan li {
   margin-bottom: 0.8rem;
+}
+.videos {
+  list-style: none;
+  padding-left: 0;
+  margin: 0.3rem 0;
+}
+.videos li {
+  margin-bottom: 0.2rem;
 }
 </style>

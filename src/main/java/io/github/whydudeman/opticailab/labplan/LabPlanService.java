@@ -3,10 +3,13 @@ package io.github.whydudeman.opticailab.labplan;
 import org.springframework.ai.chat.client.ChatClient;
 import org.springframework.stereotype.Service;
 
+import java.util.List;
 import java.util.Map;
 
 @Service
 public class LabPlanService {
+
+    private static final int VIDEOS_PER_STEP = 2;
 
     private static final String SYSTEM_PROMPT = """
             You are an expert assistant for university optics and laser physics laboratory work.
@@ -20,17 +23,30 @@ public class LabPlanService {
             """;
 
     private final Map<LlmProvider, ChatClient> chatClients;
+    private final YoutubeSearchService youtubeSearchService;
 
-    public LabPlanService(Map<LlmProvider, ChatClient> chatClients) {
+    public LabPlanService(Map<LlmProvider, ChatClient> chatClients,
+                          YoutubeSearchService youtubeSearchService) {
         this.chatClients = chatClients;
+        this.youtubeSearchService = youtubeSearchService;
     }
 
-    public LabPlan generate(LabPlanRequest request) {
-        return chatClients.get(request.providerOrDefault()).prompt()
+    public LabPlanResponse generate(LabPlanRequest request) {
+        LabPlan plan = chatClients.get(request.providerOrDefault()).prompt()
                 .system(SYSTEM_PROMPT.formatted(request.languageOrDefault()))
                 .user("Lab work topic: %s%nAvailable equipment: %s"
                         .formatted(request.topic(), String.join(", ", request.equipmentOrEmpty())))
                 .call()
                 .entity(LabPlan.class);
+        return attachVideos(plan);
+    }
+
+    private LabPlanResponse attachVideos(LabPlan plan) {
+        List<LabStepResponse> steps = plan.steps().stream()
+                .map(step -> LabStepResponse.from(step,
+                        youtubeSearchService.search(step.videoSearchQuery(), VIDEOS_PER_STEP)))
+                .toList();
+        return new LabPlanResponse(plan.title(), plan.theory(), steps,
+                plan.missingEquipment(), plan.commonMistakes(), plan.expectedResults());
     }
 }
