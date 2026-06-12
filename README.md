@@ -39,11 +39,23 @@ npm run dev
 
 Returns a structured plan: `title`, `theory`, `steps[]` (with `videoSearchQuery` per step), `missingEquipment[]`, `commonMistakes[]`, `expectedResults[]`.
 
+## Environment
+
+| Variable | Purpose |
+|---|---|
+| `ANTHROPIC_API_KEY` | Claude provider |
+| `OPENAI_API_KEY` | ChatGPT provider (optional) |
+| `YOUTUBE_API_KEY` | Video search per step (optional, plan works without it) |
+
+Data is stored in file-backed H2 (`./data/`); switch `spring.datasource` to PostgreSQL for production.
+
 ## Roadmap
 
 1. ~~Skeleton: topic + equipment → structured plan (Anthropic)~~
-2. Multi-provider switching: OpenAI, Gemini
-3. Video attachment via YouTube Data API
-4. Auth + session history (PostgreSQL)
-5. Chat follow-up within a generated plan
-6. Trilingual UI (KZ/RU/EN)
+2. ~~Multi-provider switching: OpenAI~~ (Gemini pending)
+3. ~~Video attachment via YouTube Data API~~
+4. ~~Auth + per-user plan history~~
+5. ~~Chat follow-up within a generated plan~~
+6. ~~Trilingual UI (KZ/RU/EN)~~
+7. Pilot with students, usage metrics
+8. PostgreSQL + deployment
