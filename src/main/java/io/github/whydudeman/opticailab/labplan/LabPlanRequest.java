@@ -7,7 +7,8 @@ import java.util.List;
 public record LabPlanRequest(
         @NotBlank String topic,
         List<String> equipment,
-        String language
+        String language,
+        LlmProvider provider
 ) {
 
     public String languageOrDefault() {
@@ -16,5 +17,9 @@ public record LabPlanRequest(
 
     public List<String> equipmentOrEmpty() {
         return equipment == null ? List.of() : equipment;
+    }
+
+    public LlmProvider providerOrDefault() {
+        return provider == null ? LlmProvider.ANTHROPIC : provider;
     }
 }

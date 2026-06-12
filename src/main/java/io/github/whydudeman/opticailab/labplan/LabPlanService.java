@@ -3,6 +3,8 @@ package io.github.whydudeman.opticailab.labplan;
 import org.springframework.ai.chat.client.ChatClient;
 import org.springframework.stereotype.Service;
 
+import java.util.Map;
+
 @Service
 public class LabPlanService {
 
@@ -17,14 +19,14 @@ public class LabPlanService {
             Respond in the language with ISO code: %s.
             """;
 
-    private final ChatClient chatClient;
+    private final Map<LlmProvider, ChatClient> chatClients;
 
-    public LabPlanService(ChatClient.Builder chatClientBuilder) {
-        this.chatClient = chatClientBuilder.build();
+    public LabPlanService(Map<LlmProvider, ChatClient> chatClients) {
+        this.chatClients = chatClients;
     }
 
     public LabPlan generate(LabPlanRequest request) {
-        return chatClient.prompt()
+        return chatClients.get(request.providerOrDefault()).prompt()
                 .system(SYSTEM_PROMPT.formatted(request.languageOrDefault()))
                 .user("Lab work topic: %s%nAvailable equipment: %s"
                         .formatted(request.topic(), String.join(", ", request.equipmentOrEmpty())))

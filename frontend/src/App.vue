@@ -4,6 +4,7 @@ import { ref } from 'vue'
 const topic = ref('')
 const equipmentText = ref('')
 const language = ref('ru')
+const provider = ref('ANTHROPIC')
 const loading = ref(false)
 const error = ref('')
 const plan = ref(null)
@@ -19,7 +20,8 @@ async function generatePlan() {
       body: JSON.stringify({
         topic: topic.value,
         equipment: equipmentText.value.split('\n').map(s => s.trim()).filter(Boolean),
-        language: language.value
+        language: language.value,
+        provider: provider.value
       })
     })
     if (!response.ok) throw new Error(`Server error: ${response.status}`)
@@ -52,6 +54,13 @@ async function generatePlan() {
           <option value="kk">Қазақша</option>
           <option value="ru">Русский</option>
           <option value="en">English</option>
+        </select>
+      </label>
+      <label>
+        ИИ-модель
+        <select v-model="provider">
+          <option value="ANTHROPIC">Claude (Anthropic)</option>
+          <option value="OPENAI">ChatGPT (OpenAI)</option>
         </select>
       </label>
       <button type="submit" :disabled="loading || !topic">
