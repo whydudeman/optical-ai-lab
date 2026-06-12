@@ -21,6 +21,8 @@ public class PlanHistory {
     @Column(nullable = false)
     private String userEmail;
 
+    private Long folderId;
+
     @Column(nullable = false)
     private String topic;
 
@@ -72,6 +74,14 @@ public class PlanHistory {
 
     public void setPlanJson(String planJson) {
         this.planJson = planJson;
+    }
+
+    public Long getFolderId() {
+        return folderId;
+    }
+
+    public void setFolderId(Long folderId) {
+        this.folderId = folderId;
     }
 
     public Instant getCreatedAt() {

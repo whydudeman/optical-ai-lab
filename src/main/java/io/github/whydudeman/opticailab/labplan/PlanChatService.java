@@ -1,5 +1,7 @@
 package io.github.whydudeman.opticailab.labplan;
 
+import io.github.whydudeman.opticailab.history.ChatMessage;
+import io.github.whydudeman.opticailab.history.ChatMessageRepository;
 import io.github.whydudeman.opticailab.history.PlanHistory;
 import io.github.whydudeman.opticailab.history.PlanHistoryRepository;
 import org.springframework.ai.chat.client.ChatClient;
@@ -24,20 +26,26 @@ public class PlanChatService {
 
     private final Map<LlmProvider, ChatClient> chatClients;
     private final PlanHistoryRepository planHistoryRepository;
+    private final ChatMessageRepository chatMessageRepository;
 
     public PlanChatService(Map<LlmProvider, ChatClient> chatClients,
-                           PlanHistoryRepository planHistoryRepository) {
+                           PlanHistoryRepository planHistoryRepository,
+                           ChatMessageRepository chatMessageRepository) {
         this.chatClients = chatClients;
         this.planHistoryRepository = planHistoryRepository;
+        this.chatMessageRepository = chatMessageRepository;
     }
 
     public String answer(PlanChatRequest request, String userEmail) {
         PlanHistory history = planHistoryRepository.findByIdAndUserEmail(request.historyId(), userEmail)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Plan not found"));
-        return chatClients.get(request.providerOrDefault()).prompt()
+        String answer = chatClients.get(request.providerOrDefault()).prompt()
                 .system(SYSTEM_PROMPT.formatted(history.getPlanJson()))
                 .user(request.question())
                 .call()
                 .content();
+        chatMessageRepository.save(new ChatMessage(history.getId(), "user", request.question()));
+        chatMessageRepository.save(new ChatMessage(history.getId(), "assistant", answer));
+        return answer;
     }
 }
