@@ -2,7 +2,7 @@ spring:
   application:
     name: optical-ai-lab
   datasource:
-    url: jdbc:h2:file:./data/opticai
+    url: jdbc:h2:file:./data/opticai;AUTO_SERVER=TRUE
     username: sa
     password: ""
   jpa:
