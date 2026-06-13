@@ -8,11 +8,13 @@ public record PlanHistoryItemResponse(
         String language,
         String provider,
         Long folderId,
+        boolean completed,
         Instant createdAt
 ) {
 
     public static PlanHistoryItemResponse from(PlanHistory history) {
         return new PlanHistoryItemResponse(history.getId(), history.getTopic(),
-                history.getLanguage(), history.getProvider(), history.getFolderId(), history.getCreatedAt());
+                history.getLanguage(), history.getProvider(), history.getFolderId(),
+                history.getCompletedAt() != null, history.getCreatedAt());
     }
 }

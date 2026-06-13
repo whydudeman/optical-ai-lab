@@ -34,6 +34,11 @@ public class PlanHistory {
     @Column(nullable = false)
     private String planJson;
 
+    @Lob
+    private String reportJson;
+
+    private Instant completedAt;
+
     @Column(nullable = false)
     private Instant createdAt = Instant.now();
 
@@ -74,6 +79,22 @@ public class PlanHistory {
 
     public void setPlanJson(String planJson) {
         this.planJson = planJson;
+    }
+
+    public String getReportJson() {
+        return reportJson;
+    }
+
+    public void setReportJson(String reportJson) {
+        this.reportJson = reportJson;
+    }
+
+    public Instant getCompletedAt() {
+        return completedAt;
+    }
+
+    public void setCompletedAt(Instant completedAt) {
+        this.completedAt = completedAt;
     }
 
     public Long getFolderId() {

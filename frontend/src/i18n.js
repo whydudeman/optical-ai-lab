@@ -36,7 +36,19 @@ export const messages = {
     ask: 'Спросить',
     asking: 'Думаю…',
     emptyTitle: 'Создайте план лабораторной работы',
-    emptyText: 'Укажите тему и доступное оборудование — ассистент составит пошаговый план с теорией, видео и типичными ошибками.'
+    emptyText: 'Укажите тему и доступное оборудование — ассистент составит пошаговый план с теорией, видео и типичными ошибками.',
+    finishLab: 'Завершить работу и сформировать отчёт',
+    finishConfirm: 'Сформировать отчёт? Это завершит лабораторную работу — чат по ней будет закрыт, а отчёт составится по плану и вашим вопросам.',
+    reportGenerating: 'Формирую отчёт…',
+    report: 'Отчёт о лабораторной работе',
+    objective: 'Цель работы',
+    equipmentUsed: 'Использованное оборудование',
+    procedure: 'Ход работы',
+    results: 'Результаты',
+    conclusions: 'Выводы',
+    questionsDiscussed: 'Проработанные вопросы',
+    completedBadge: 'Завершена',
+    printReport: 'Распечатать отчёт'
   },
   kk: {
     subtitle: 'Оптика және лазер физикасы бойынша зертханалық жұмыстарға арналған AI-көмекші',
@@ -75,7 +87,19 @@ export const messages = {
     ask: 'Сұрау',
     asking: 'Ойлануда…',
     emptyTitle: 'Зертханалық жұмыс жоспарын құрыңыз',
-    emptyText: 'Тақырып пен қолжетімді жабдықты көрсетіңіз — көмекші теориясы, видеосы және жиі қателері бар қадамдық жоспар құрады.'
+    emptyText: 'Тақырып пен қолжетімді жабдықты көрсетіңіз — көмекші теориясы, видеосы және жиі қателері бар қадамдық жоспар құрады.',
+    finishLab: 'Жұмысты аяқтап, есеп құру',
+    finishConfirm: 'Есеп құру керек пе? Бұл зертханалық жұмысты аяқтайды — чат жабылады, есеп жоспар мен сұрақтарыңыз негізінде құрылады.',
+    reportGenerating: 'Есеп құрылуда…',
+    report: 'Зертханалық жұмыс есебі',
+    objective: 'Жұмыс мақсаты',
+    equipmentUsed: 'Қолданылған жабдық',
+    procedure: 'Жұмыс барысы',
+    results: 'Нәтижелер',
+    conclusions: 'Қорытындылар',
+    questionsDiscussed: 'Талқыланған сұрақтар',
+    completedBadge: 'Аяқталды',
+    printReport: 'Есепті басып шығару'
   },
   en: {
     subtitle: 'AI assistant for optics and laser physics laboratory work',
@@ -114,6 +138,18 @@ export const messages = {
     ask: 'Ask',
     asking: 'Thinking…',
     emptyTitle: 'Create a lab work plan',
-    emptyText: 'Describe the topic and available equipment — the assistant will build a step-by-step plan with theory, videos and common mistakes.'
+    emptyText: 'Describe the topic and available equipment — the assistant will build a step-by-step plan with theory, videos and common mistakes.',
+    finishLab: 'Finish the work and generate report',
+    finishConfirm: 'Generate the report? This completes the lab work — the chat will be closed and the report will be based on the plan and your questions.',
+    reportGenerating: 'Generating report…',
+    report: 'Laboratory work report',
+    objective: 'Objective',
+    equipmentUsed: 'Equipment used',
+    procedure: 'Procedure',
+    results: 'Results',
+    conclusions: 'Conclusions',
+    questionsDiscussed: 'Questions worked through',
+    completedBadge: 'Completed',
+    printReport: 'Print report'
   }
 }

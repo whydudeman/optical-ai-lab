@@ -32,6 +32,12 @@ const chatLoading = ref(false)
 
 const playingVideo = ref(null)
 
+const report = ref(null)
+const reportLoading = ref(false)
+
+const currentItem = computed(() => history.value.find(h => h.id === plan.value?.historyId))
+const isCompleted = computed(() => Boolean(report.value) || Boolean(currentItem.value?.completed))
+
 const folderGroups = computed(() => {
   const groups = folders.value.map(folder => ({
     folder,
@@ -106,6 +112,7 @@ async function logout() {
 function startNewPlan() {
   plan.value = null
   chatMessages.value = []
+  report.value = null
   showForm.value = true
   playingVideo.value = null
 }
@@ -113,9 +120,28 @@ function startNewPlan() {
 async function openHistoryItem(id) {
   plan.value = await api(`/api/history/${id}`)
   chatMessages.value = await api(`/api/history/${id}/chat`)
+  report.value = null
+  if (history.value.find(h => h.id === id)?.completed) {
+    report.value = await api(`/api/lab-plans/${id}/report`).catch(() => null)
+  }
   showForm.value = false
   playingVideo.value = null
   document.querySelector('.content')?.scrollTo({ top: 0 })
+}
+
+async function finishLab() {
+  if (!plan.value?.historyId || !confirm(t.value.finishConfirm)) return
+  reportLoading.value = true
+  try {
+    report.value = await api(`/api/lab-plans/${plan.value.historyId}/report?provider=${provider.value}`, {
+      method: 'POST'
+    })
+    await reload()
+  } catch (e) {
+    error.value = e.message
+  } finally {
+    reportLoading.value = false
+  }
 }
 
 async function generatePlan() {
@@ -132,6 +158,7 @@ async function generatePlan() {
       })
     })
     chatMessages.value = []
+    report.value = null
     showForm.value = false
     playingVideo.value = null
     await reload()
@@ -204,6 +231,10 @@ function toggleFolder(id) {
 function thumbnail(videoId) {
   return `https://i.ytimg.com/vi/${videoId}/hqdefault.jpg`
 }
+
+function printReport() {
+  window.print()
+}
 </script>
 
 <template>
@@ -270,7 +301,9 @@ function thumbnail(videoId) {
           <ul v-if="expandedFolders.has(group.folder.id)" class="plan-list nested">
             <li v-for="item in group.items" :key="item.id"
                 :class="{ active: plan?.historyId === item.id }">
-              <button class="plan-link" @click="openHistoryItem(item.id)">{{ item.topic }}</button>
+              <button class="plan-link" @click="openHistoryItem(item.id)">
+                <span v-if="item.completed" class="done-mark">✓</span>{{ item.topic }}
+              </button>
             </li>
           </ul>
         </div>
@@ -332,7 +365,10 @@ function thumbnail(videoId) {
 
       <article v-if="plan && !showForm" class="plan-view">
         <header class="plan-header">
-          <h2>{{ plan.title }}</h2>
+          <h2>
+            {{ plan.title }}
+            <span v-if="isCompleted" class="badge-done">✓ {{ t.completedBadge }}</span>
+          </h2>
           <div class="plan-actions">
             <select :value="history.find(h => h.id === plan.historyId)?.folderId ?? ''"
                     @change="movePlan(plan.historyId, $event.target.value ? Number($event.target.value) : null)">
@@ -399,13 +435,46 @@ function thumbnail(videoId) {
                :class="['chat-message', message.role]">
             {{ message.text }}
           </div>
-          <form class="chat-form" @submit.prevent="askQuestion">
+          <form v-if="!isCompleted" class="chat-form" @submit.prevent="askQuestion">
             <input v-model="chatQuestion" :placeholder="t.chatPlaceholder" :disabled="chatLoading" />
             <button type="submit" class="primary" :disabled="chatLoading || !chatQuestion.trim()">
               {{ chatLoading ? t.asking : t.ask }}
             </button>
           </form>
         </section>
+
+        <section v-if="report" class="panel report">
+          <div class="report-head">
+            <h3>{{ t.report }}</h3>
+            <button class="ghost" @click="printReport">{{ t.printReport }}</button>
+          </div>
+          <h2 class="report-title">{{ report.title }}</h2>
+
+          <h4>{{ t.objective }}</h4>
+          <p>{{ report.objective }}</p>
+
+          <h4>{{ t.equipmentUsed }}</h4>
+          <ul><li v-for="item in report.equipmentUsed" :key="item">{{ item }}</li></ul>
+
+          <h4>{{ t.procedure }}</h4>
+          <p>{{ report.procedureSummary }}</p>
+
+          <h4>{{ t.results }}</h4>
+          <p>{{ report.results }}</p>
+
+          <h4>{{ t.conclusions }}</h4>
+          <ul><li v-for="item in report.conclusions" :key="item">{{ item }}</li></ul>
+
+          <template v-if="report.questionsDiscussed?.length">
+            <h4>{{ t.questionsDiscussed }}</h4>
+            <ul><li v-for="item in report.questionsDiscussed" :key="item">{{ item }}</li></ul>
+          </template>
+        </section>
+
+        <button v-if="!isCompleted" class="primary finish-btn"
+                :disabled="reportLoading" @click="finishLab">
+          {{ reportLoading ? t.reportGenerating : t.finishLab }}
+        </button>
       </article>
     </main>
   </div>
@@ -866,5 +935,69 @@ label {
 }
 .chat-form input {
   flex: 1;
+}
+.badge-done {
+  display: inline-block;
+  background: #e5f5ec;
+  color: #1a7f4b;
+  font-size: 0.72rem;
+  font-weight: 650;
+  padding: 0.2rem 0.6rem;
+  border-radius: 999px;
+  vertical-align: middle;
+  margin-left: 0.5rem;
+  white-space: nowrap;
+}
+.done-mark {
+  color: #3dbb7d;
+  margin-right: 0.35rem;
+  font-weight: 700;
+}
+.finish-btn {
+  display: block;
+  width: 100%;
+  padding: 0.9rem;
+  margin-bottom: 2rem;
+}
+.report {
+  border-left: 4px solid #1a7f4b;
+}
+.report-head {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+.report-head h3 {
+  margin: 0;
+  text-transform: uppercase;
+  font-size: 0.78rem;
+  letter-spacing: 0.08em;
+  color: var(--text-soft);
+}
+.report-title {
+  margin: 0.6rem 0 1rem;
+  font-size: 1.3rem;
+}
+.report h4 {
+  margin: 1.1rem 0 0.3rem;
+  font-size: 0.95rem;
+}
+.report p {
+  margin: 0;
+  line-height: 1.65;
+}
+
+@media print {
+  .sidebar, .plan-header .plan-actions, .chat, .finish-btn,
+  .plan-view > .panel:not(.report) {
+    display: none !important;
+  }
+  .content {
+    padding: 0;
+  }
+  .panel.report {
+    border: none;
+    box-shadow: none;
+  }
 }
 </style>

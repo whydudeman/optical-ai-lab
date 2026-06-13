@@ -1,6 +1,10 @@
 spring:
   application:
     name: optical-ai-lab
+  http:
+    client:
+      connect-timeout: 30s
+      read-timeout: 300s
   datasource:
     url: jdbc:h2:file:./data/opticai;AUTO_SERVER=TRUE
     username: sa
