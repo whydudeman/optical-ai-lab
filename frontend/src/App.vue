@@ -35,8 +35,14 @@ const playingVideo = ref(null)
 const report = ref(null)
 const reportLoading = ref(false)
 
+const journalResults = ref('')
+const journalConclusions = ref('')
+const journalSaved = ref(false)
+const customReportName = ref(null)
+
 const currentItem = computed(() => history.value.find(h => h.id === plan.value?.historyId))
 const isCompleted = computed(() => Boolean(report.value) || Boolean(currentItem.value?.completed))
+const canFinish = computed(() => journalResults.value.trim().length > 0 && journalSaved.value)
 
 const folderGroups = computed(() => {
   const groups = folders.value.map(folder => ({
@@ -113,20 +119,43 @@ function startNewPlan() {
   plan.value = null
   chatMessages.value = []
   report.value = null
+  resetJournal()
   showForm.value = true
   playingVideo.value = null
+}
+
+function resetJournal() {
+  journalResults.value = ''
+  journalConclusions.value = ''
+  journalSaved.value = true
+  customReportName.value = null
 }
 
 async function openHistoryItem(id) {
   plan.value = await api(`/api/history/${id}`)
   chatMessages.value = await api(`/api/history/${id}/chat`)
   report.value = null
+  const journal = await api(`/api/lab-plans/${id}/journal`).catch(() => ({ results: '', conclusions: '' }))
+  journalResults.value = journal.results || ''
+  journalConclusions.value = journal.conclusions || ''
+  journalSaved.value = true
+  customReportName.value = await api(`/api/lab-plans/${id}/custom-report/info`)
+    .then(info => info?.filename ?? null).catch(() => null)
   if (history.value.find(h => h.id === id)?.completed) {
     report.value = await api(`/api/lab-plans/${id}/report`).catch(() => null)
   }
   showForm.value = false
   playingVideo.value = null
   document.querySelector('.content')?.scrollTo({ top: 0 })
+}
+
+async function saveJournal() {
+  if (!plan.value?.historyId) return
+  await api(`/api/lab-plans/${plan.value.historyId}/journal`, {
+    method: 'PUT',
+    body: JSON.stringify({ results: journalResults.value, conclusions: journalConclusions.value })
+  })
+  journalSaved.value = true
 }
 
 async function finishLab() {
@@ -144,6 +173,29 @@ async function finishLab() {
   }
 }
 
+function downloadPdf() {
+  window.open(`/api/lab-plans/${plan.value.historyId}/report.pdf`, '_blank')
+}
+
+async function uploadCustomReport(event) {
+  const file = event.target.files[0]
+  if (!file || !plan.value?.historyId) return
+  const formData = new FormData()
+  formData.append('file', file)
+  const response = await fetch(`/api/lab-plans/${plan.value.historyId}/custom-report`, {
+    method: 'POST',
+    body: formData
+  })
+  if (response.ok) {
+    customReportName.value = (await response.json()).filename
+  }
+  event.target.value = ''
+}
+
+function downloadCustomReport() {
+  window.open(`/api/lab-plans/${plan.value.historyId}/custom-report`, '_blank')
+}
+
 async function generatePlan() {
   loading.value = true
   error.value = ''
@@ -159,6 +211,7 @@ async function generatePlan() {
     })
     chatMessages.value = []
     report.value = null
+    resetJournal()
     showForm.value = false
     playingVideo.value = null
     await reload()
@@ -443,10 +496,29 @@ function printReport() {
           </form>
         </section>
 
+        <section v-if="!isCompleted" class="panel journal">
+          <h3>{{ t.journal }}</h3>
+          <label>
+            {{ t.resultsLabel }}
+            <textarea v-model="journalResults" rows="6" :placeholder="t.resultsPlaceholder"
+                      @input="journalSaved = false" />
+          </label>
+          <label>
+            {{ t.conclusionsLabel }}
+            <textarea v-model="journalConclusions" rows="3" :placeholder="t.conclusionsPlaceholder"
+                      @input="journalSaved = false" />
+          </label>
+          <div class="journal-actions">
+            <button class="ghost" :disabled="journalSaved" @click="saveJournal">
+              {{ journalSaved ? '✓ ' + t.saved : t.saveJournal }}
+            </button>
+          </div>
+        </section>
+
         <section v-if="report" class="panel report">
           <div class="report-head">
             <h3>{{ t.report }}</h3>
-            <button class="ghost" @click="printReport">{{ t.printReport }}</button>
+            <button class="primary" @click="downloadPdf">{{ t.downloadPdf }}</button>
           </div>
           <h2 class="report-title">{{ report.title }}</h2>
 
@@ -457,13 +529,13 @@ function printReport() {
           <ul><li v-for="item in report.equipmentUsed" :key="item">{{ item }}</li></ul>
 
           <h4>{{ t.procedure }}</h4>
-          <p>{{ report.procedureSummary }}</p>
+          <ul><li v-for="item in report.procedure" :key="item">{{ item }}</li></ul>
 
           <h4>{{ t.results }}</h4>
           <p>{{ report.results }}</p>
 
           <h4>{{ t.conclusions }}</h4>
-          <ul><li v-for="item in report.conclusions" :key="item">{{ item }}</li></ul>
+          <p>{{ report.conclusions }}</p>
 
           <template v-if="report.questionsDiscussed?.length">
             <h4>{{ t.questionsDiscussed }}</h4>
@@ -471,10 +543,26 @@ function printReport() {
           </template>
         </section>
 
+        <section v-if="report" class="panel own-report">
+          <h3>{{ t.ownReport }}</h3>
+          <p class="muted">{{ t.ownReportHint }}</p>
+          <div class="own-report-actions">
+            <label class="upload-btn">
+              {{ t.uploadOwnReport }}
+              <input type="file" accept=".pdf,.doc,.docx" hidden @change="uploadCustomReport" />
+            </label>
+            <button v-if="customReportName" class="ghost" @click="downloadCustomReport">
+              ↓ {{ customReportName }}
+            </button>
+          </div>
+        </section>
+
         <button v-if="!isCompleted" class="primary finish-btn"
-                :disabled="reportLoading" @click="finishLab">
+                :disabled="reportLoading || !canFinish"
+                :title="canFinish ? '' : t.resultsRequired" @click="finishLab">
           {{ reportLoading ? t.reportGenerating : t.finishLab }}
         </button>
+        <p v-if="!isCompleted && !canFinish" class="muted finish-hint">{{ t.resultsRequired }}</p>
       </article>
     </main>
   </div>
@@ -958,6 +1046,44 @@ label {
   width: 100%;
   padding: 0.9rem;
   margin-bottom: 2rem;
+}
+.journal {
+  display: flex;
+  flex-direction: column;
+  gap: 0.9rem;
+}
+.journal-actions {
+  display: flex;
+  justify-content: flex-end;
+}
+.journal-actions .ghost:disabled {
+  color: #1a7f4b;
+  cursor: default;
+}
+.finish-hint {
+  text-align: center;
+  font-size: 0.85rem;
+  margin: -1rem 0 2rem;
+}
+.own-report {
+  border-left: 4px solid var(--accent);
+}
+.own-report-actions {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  margin-top: 0.6rem;
+  flex-wrap: wrap;
+}
+.upload-btn {
+  display: inline-block;
+  background: var(--accent-soft);
+  color: var(--accent);
+  font-weight: 600;
+  font-size: 0.9rem;
+  padding: 0.55rem 1rem;
+  border-radius: var(--radius);
+  cursor: pointer;
 }
 .report {
   border-left: 4px solid #1a7f4b;

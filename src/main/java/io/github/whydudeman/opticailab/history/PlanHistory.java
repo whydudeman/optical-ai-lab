@@ -31,6 +31,9 @@ public class PlanHistory {
     private String provider;
 
     @Lob
+    private String equipment;
+
+    @Lob
     @Column(nullable = false)
     private String planJson;
 
@@ -71,6 +74,14 @@ public class PlanHistory {
 
     public String getProvider() {
         return provider;
+    }
+
+    public String getEquipment() {
+        return equipment;
+    }
+
+    public void setEquipment(String equipment) {
+        this.equipment = equipment;
     }
 
     public String getPlanJson() {

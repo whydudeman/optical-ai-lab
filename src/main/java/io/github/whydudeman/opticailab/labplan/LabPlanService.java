@@ -69,9 +69,11 @@ public class LabPlanService {
     }
 
     private LabPlanResponse saveHistory(LabPlanResponse response, LabPlanRequest request, String userEmail) {
-        PlanHistory saved = planHistoryRepository.save(new PlanHistory(
+        PlanHistory saved = new PlanHistory(
                 userEmail, request.topic(), request.languageOrDefault(),
-                request.providerOrDefault().name(), toJson(response)));
+                request.providerOrDefault().name(), toJson(response));
+        saved.setEquipment(String.join("\n", request.equipmentOrEmpty()));
+        saved = planHistoryRepository.save(saved);
         LabPlanResponse withId = response.withHistoryId(saved.getId());
         saved.setPlanJson(toJson(withId));
         planHistoryRepository.save(saved);

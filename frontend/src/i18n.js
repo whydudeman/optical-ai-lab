@@ -48,7 +48,20 @@ export const messages = {
     conclusions: 'Выводы',
     questionsDiscussed: 'Проработанные вопросы',
     completedBadge: 'Завершена',
-    printReport: 'Распечатать отчёт'
+    printReport: 'Распечатать отчёт',
+    journal: 'Журнал работы',
+    resultsLabel: 'Результаты — ваши измерения и наблюдения',
+    resultsPlaceholder: 'Запишите измеренные значения, наблюдения, расчёты…',
+    conclusionsLabel: 'Выводы (необязательно — иначе сформулирует ассистент)',
+    conclusionsPlaceholder: 'Ваши выводы по работе…',
+    saveJournal: 'Сохранить журнал',
+    saved: 'Сохранено',
+    resultsRequired: 'Заполните и сохраните результаты, чтобы завершить работу',
+    downloadPdf: 'Скачать PDF',
+    ownReport: 'Свой отчёт',
+    uploadOwnReport: 'Загрузить свой файл',
+    ownReportHint: 'Можно приложить собственный файл отчёта (PDF, DOCX) в нужном формате.',
+    downloadOwn: 'Скачать загруженный файл'
   },
   kk: {
     subtitle: 'Оптика және лазер физикасы бойынша зертханалық жұмыстарға арналған AI-көмекші',
@@ -99,7 +112,20 @@ export const messages = {
     conclusions: 'Қорытындылар',
     questionsDiscussed: 'Талқыланған сұрақтар',
     completedBadge: 'Аяқталды',
-    printReport: 'Есепті басып шығару'
+    printReport: 'Есепті басып шығару',
+    journal: 'Жұмыс журналы',
+    resultsLabel: 'Нәтижелер — өлшемдеріңіз бен бақылауларыңыз',
+    resultsPlaceholder: 'Өлшенген мәндерді, бақылауларды, есептеулерді жазыңыз…',
+    conclusionsLabel: 'Қорытындылар (міндетті емес — әйтпесе көмекші құрастырады)',
+    conclusionsPlaceholder: 'Жұмыс бойынша қорытындыларыңыз…',
+    saveJournal: 'Журналды сақтау',
+    saved: 'Сақталды',
+    resultsRequired: 'Жұмысты аяқтау үшін нәтижелерді толтырып, сақтаңыз',
+    downloadPdf: 'PDF жүктеу',
+    ownReport: 'Өз есебіңіз',
+    uploadOwnReport: 'Өз файлыңызды жүктеу',
+    ownReportHint: 'Қажет форматтағы өз есеп файлыңызды (PDF, DOCX) тіркеуге болады.',
+    downloadOwn: 'Жүктелген файлды жүктеу'
   },
   en: {
     subtitle: 'AI assistant for optics and laser physics laboratory work',
@@ -150,6 +176,19 @@ export const messages = {
     conclusions: 'Conclusions',
     questionsDiscussed: 'Questions worked through',
     completedBadge: 'Completed',
-    printReport: 'Print report'
+    printReport: 'Print report',
+    journal: 'Work journal',
+    resultsLabel: 'Results — your measurements and observations',
+    resultsPlaceholder: 'Write down measured values, observations, calculations…',
+    conclusionsLabel: 'Conclusions (optional — otherwise the assistant drafts them)',
+    conclusionsPlaceholder: 'Your conclusions about the work…',
+    saveJournal: 'Save journal',
+    saved: 'Saved',
+    resultsRequired: 'Fill in and save the results to finish the work',
+    downloadPdf: 'Download PDF',
+    ownReport: 'Your own report',
+    uploadOwnReport: 'Upload your file',
+    ownReportHint: 'You can attach your own report file (PDF, DOCX) in the required format.',
+    downloadOwn: 'Download uploaded file'
   }
 }

@@ -5,10 +5,11 @@ import java.util.List;
 public record LabReport(
         String title,
         String objective,
+        String theory,
         List<String> equipmentUsed,
-        String procedureSummary,
+        List<String> procedure,
         String results,
-        List<String> conclusions,
+        String conclusions,
         List<String> questionsDiscussed
 ) {
 }
