@@ -8,12 +8,31 @@ import java.io.ByteArrayOutputStream;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.util.List;
+import java.util.Map;
 
 @Service
 public class ReportPdfService {
 
-    public byte[] render(LabReport report, String studentEmail) {
-        String html = buildHtml(report, studentEmail);
+    private record Labels(String docKind, String student, String date, String objective,
+                          String theory, String equipment, String procedure, String results,
+                          String conclusions, String questions) {
+    }
+
+    private static final Labels EN = new Labels("Laboratory Work Report", "Student", "Date",
+            "Objective", "Theory", "Equipment", "Procedure", "Results", "Conclusions",
+            "Questions addressed during the work");
+    private static final Labels RU = new Labels("Отчёт о лабораторной работе", "Студент", "Дата",
+            "Цель работы", "Теоретическая часть", "Оборудование", "Ход работы", "Результаты", "Выводы",
+            "Вопросы, проработанные в ходе работы");
+    private static final Labels KK = new Labels("Зертханалық жұмыс есебі", "Студент", "Күні",
+            "Жұмыс мақсаты", "Теориялық бөлім", "Жабдық", "Жұмыс барысы", "Нәтижелер", "Қорытындылар",
+            "Жұмыс барысында қаралған сұрақтар");
+
+    private static final Map<String, Labels> LABELS = Map.of("en", EN, "ru", RU, "kk", KK);
+
+    public byte[] render(LabReport report, String studentEmail, String language) {
+        Labels labels = LABELS.getOrDefault(language == null ? "en" : language, EN);
+        String html = buildHtml(report, studentEmail, labels);
         try (ByteArrayOutputStream out = new ByteArrayOutputStream()) {
             PdfRendererBuilder builder = new PdfRendererBuilder();
             builder.useFont(() -> getClass().getResourceAsStream("/fonts/DejaVuSans.ttf"),
@@ -29,18 +48,18 @@ public class ReportPdfService {
         }
     }
 
-    private String buildHtml(LabReport report, String studentEmail) {
+    private String buildHtml(LabReport report, String studentEmail, Labels labels) {
         StringBuilder body = new StringBuilder();
-        body.append(section("Цель работы", paragraph(report.objective())));
+        body.append(section(labels.objective(), paragraph(report.objective())));
         if (report.theory() != null && !report.theory().isBlank()) {
-            body.append(section("Теоретическая часть", paragraph(report.theory())));
+            body.append(section(labels.theory(), paragraph(report.theory())));
         }
-        body.append(section("Оборудование", list(report.equipmentUsed())));
-        body.append(section("Ход работы", list(report.procedure())));
-        body.append(section("Результаты", paragraph(report.results())));
-        body.append(section("Выводы", paragraph(report.conclusions())));
+        body.append(section(labels.equipment(), list(report.equipmentUsed())));
+        body.append(section(labels.procedure(), list(report.procedure())));
+        body.append(section(labels.results(), paragraph(report.results())));
+        body.append(section(labels.conclusions(), paragraph(report.conclusions())));
         if (report.questionsDiscussed() != null && !report.questionsDiscussed().isEmpty()) {
-            body.append(section("Вопросы, проработанные в ходе работы", list(report.questionsDiscussed())));
+            body.append(section(labels.questions(), list(report.questionsDiscussed())));
         }
 
         String date = LocalDate.now().format(DateTimeFormatter.ofPattern("dd.MM.yyyy"));
@@ -61,13 +80,14 @@ public class ReportPdfService {
                 </style></head><body>
                 <div class="title-block">
                   <div class="org">ALT University</div>
-                  <div class="doc-kind">Отчёт о лабораторной работе</div>
+                  <div class="doc-kind">%s</div>
                   <h1>%s</h1>
-                  <div class="meta">Студент: %s &#160;&#160;|&#160;&#160; Дата: %s</div>
+                  <div class="meta">%s: %s &#160;&#160;|&#160;&#160; %s: %s</div>
                 </div>
                 %s
                 </body></html>
-                """.formatted(escape(report.title()), escape(studentEmail), date, body);
+                """.formatted(escape(labels.docKind()), escape(report.title()),
+                escape(labels.student()), escape(studentEmail), escape(labels.date()), date, body);
     }
 
     private String section(String heading, String content) {

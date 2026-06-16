@@ -47,9 +47,9 @@ public class ReportController {
 
     @GetMapping("/report.pdf")
     public ResponseEntity<Resource> reportPdf(@PathVariable Long historyId, Principal principal) {
-        requireOwned(historyId, principal);
+        PlanHistory history = requireOwned(historyId, principal);
         LabReport report = labReportService.getReport(historyId, principal.getName());
-        byte[] pdf = reportPdfService.render(report, principal.getName());
+        byte[] pdf = reportPdfService.render(report, principal.getName(), history.getLanguage());
         return download(pdf, "report-" + historyId + ".pdf", MediaType.APPLICATION_PDF, true);
     }
 
