@@ -60,7 +60,7 @@ public class ReportPdfService {
                 li { margin-bottom: 2pt; }
                 </style></head><body>
                 <div class="title-block">
-                  <div class="org">Satbayev University</div>
+                  <div class="org">ALT University</div>
                   <div class="doc-kind">Отчёт о лабораторной работе</div>
                   <h1>%s</h1>
                   <div class="meta">Студент: %s &#160;&#160;|&#160;&#160; Дата: %s</div>
