@@ -23,7 +23,7 @@ public class PlanHistory {
 
     private Long folderId;
 
-    @Column(nullable = false)
+    @Column(nullable = false, length = 4000)
     private String topic;
 
     private String language;
